@@ -1,19 +1,15 @@
 // Write your "projects" router here!
 const express = require('express');
 const Project = require('./projects-model');
-const pm = require('./projects-middleware');
+const {
+    validateProject,
+    validateProjectId
+} = require('./projects-middleware');
 const db = require('../../data/dbConfig.js');
 
 const router = express.Router();
 
 /**
-
- [GET] /api/projects/:id
-Returns a project with the given id as the body of the response.
-If there is no project with the given id it responds with a status code 404.
- [POST] /api/projects
-Returns the newly created project as the body of the response.
-If the request body is missing any of the required fields it responds with a status code 400.
  [PUT] /api/projects/:id
 Returns the updated project as the body of the response.
 If there is no project with the given id it responds with a status code 404.
@@ -47,12 +43,21 @@ router.get('/:id', async (req,res) => {
         console.log(err.message);
     }
 })
-// router.post('/', (req,res) => {
-
-// })
-// router.put('/:id', (req,res) => {
-
-// })
+router.post('/', validateProject, (req,res) => {
+    Project.insert(req.body)
+        .then(newProject => {
+            res.status(201).json(newProject);
+        })
+        .catch(err => {console.error(err)})
+})
+router.put('/:id', validateProject, validateProjectId, (req,res) => {
+    Project.update(req.params.id, req.body)
+        .then(project => {
+            res.status(200).json(project);
+        })
+        .catch(err => {console.error(err)})
+        
+})
 // router.delete('/:id', (req,res) => {
 
 // })
