@@ -3,7 +3,8 @@ const express = require('express');
 const Project = require('./projects-model');
 const {
     validateProject,
-    validateProjectId
+    validateProjectId,
+    validateCompleted,
 } = require('./projects-middleware');
 const db = require('../../data/dbConfig.js');
 
@@ -50,7 +51,7 @@ router.post('/', validateProject, (req,res) => {
         })
         .catch(err => {console.error(err)})
 })
-router.put('/:id', validateProject, validateProjectId, (req,res) => {
+router.put('/:id', validateCompleted, validateProjectId, (req,res) => {
     Project.update(req.params.id, req.body)
         .then(project => {
             res.status(200).json(project);
@@ -58,11 +59,20 @@ router.put('/:id', validateProject, validateProjectId, (req,res) => {
         .catch(err => {console.error(err)})
         
 })
-// router.delete('/:id', (req,res) => {
-
-// })
-// router.get('/:id/actions', (req,res) => {
-
-// })
+router.delete('/:id', validateProjectId, async (req,res) => {
+    const deleted = await Project.get(req.params.id);
+    Project.remove(req.params.id)
+        .then(()=> {
+            res.json(deleted);
+        })
+        .catch(err => {console.error(err)})
+})
+router.get('/:id/actions', validateProjectId, (req,res) => {
+    Project.getProjectActions(req.params.id)
+        .then(actions => {
+            res.json(actions);
+        })
+        .catch(err=>{console.error(err)})
+})
 
 module.exports = router;

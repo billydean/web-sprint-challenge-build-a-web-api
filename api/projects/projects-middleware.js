@@ -20,8 +20,16 @@ async function validateProjectId(req,res,next) {
         next();
     }
 }
-
+function validateCompleted(req,res,next) {
+    const {name, description, completed} = req.body;
+    if (!name || !description || completed === undefined) {
+        res.status(400).json({message: "projects need both a name and a description!"})
+    } else {
+        next();
+    }
+}
 module.exports = {
     validateProject,
-    validateProjectId
+    validateProjectId,
+    validateCompleted
 }
